@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Zoom — Meet Without Limits{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="mesh-bg"><div class="mesh-orb"></div></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <div class="logo-icon">🎥</div>
+    Zoom
+  </a>
+  <ul class="nav-links">
+    <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %} data-i18n="nav.home">Home</a></li>
+    <li><a href="{% url 'create_room' %}" {% if request.resolver_match.url_name == 'create_room' %}class="active"{% endif %} data-i18n="nav.new">New Room</a></li>
+    <li><a href="{% url 'join_room' %}" {% if request.resolver_match.url_name == 'join_room' %}class="active"{% endif %} data-i18n="nav.join">Join Room</a></li>
+    <li><a href="{% url 'about' %}" {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %} data-i18n="nav.about">About</a></li>
+    <li><a href="{% url 'chat' %}" {% if request.resolver_match.url_name == 'chat' %}class="active"{% endif %} style="color:var(--cyan)" data-i18n="nav.chat">✦ AI Chat</a></li>
+  </ul>
+  <div class="nav-actions">
+    <div class="lang-switch" id="langSwitch">
+      <button class="lang-toggle" id="langToggle" type="button" aria-label="Change language"><span class="globe">🌐</span><span id="langCurrent">EN</span><span class="chev">▼</span></button>
+      <div class="lang-menu" id="langMenu"></div>
+    </div>
+    <a href="{% url 'join_room' %}" class="btn btn-ghost btn-sm" data-i18n="nav.join_btn">Join</a>
+    <a href="{% url 'create_room' %}" class="btn btn-primary btn-sm" data-i18n="nav.new_btn">+ New Room</a>
+  </div>
+</nav>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="messages-bar">
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+    <span>{% if message.tags == 'error' %}✕{% elif message.tags == 'success' %}✓{% else %}ℹ{% endif %}</span>
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div class="footer-logo">Zoom</div>
+  <div class="footer-links">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'create_room' %}">Create Room</a>
+    <a href="{% url 'join_room' %}">Join Room</a>
+    <a href="{% url 'about' %}">About</a>
+  </div>
+  <p data-i18n="footer.tagline">© 2025 Zoom Platform. Connect with anyone, anywhere.</p>
+</footer>
+
+<!-- FLOATING CHAT BUBBLE -->
+{% if request.resolver_match.url_name != 'chat' %}
+<a href="{% url 'chat' %}" class="float-chat-btn" title="Chat with Zoom AI">
+  <span class="float-chat-icon">🤖</span>
+  <span class="float-chat-label">AI</span>
+  <span class="float-chat-dot"></span>
+</a>
+{% endif %}
+
+<style>
+.float-chat-btn {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  width: 58px; height: 58px;
+  background: linear-gradient(135deg, #1a6cf5, #00d4ff);
+  border-radius: 18px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 8px 30px rgba(26,108,245,0.5);
+  z-index: 999;
+  transition: all 0.3s;
+  gap: 1px;
+}
+.float-chat-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 14px 40px rgba(26,108,245,0.65);
+}
+.float-chat-icon { font-size: 1.3rem; line-height: 1; }
+.float-chat-label { font-size: 0.6rem; font-weight: 700; color: white; font-family: 'Syne', sans-serif; letter-spacing: 0.05em; }
+.float-chat-dot {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 13px; height: 13px;
+  background: #22c55e;
+  border-radius: 50%;
+  border: 2px solid var(--navy);
+  animation: pulse 2s infinite;
+}
+</style>
+
+<script src="{% static 'js/i18n.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

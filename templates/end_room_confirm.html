@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}End Room — Zoom{% endblock %}
+{% block content %}
+<div class="confirm-page">
+  <div class="confirm-card">
+    <div class="confirm-icon">⚠️</div>
+    <h1 data-i18n="end.title">End This Room?</h1>
+    <p><span data-i18n="end.warn_pre">You're about to end</span> <strong>{{ room.name }}</strong>. <span data-i18n="end.warn_post">This will remove the room and disconnect all participants. This action cannot be undone.</span></p>
+    <div class="confirm-actions">
+      <a href="{% url 'room_detail' room.code %}" class="btn btn-ghost" data-i18n="end.cancel">← Cancel</a>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" data-i18n="end.confirm">✕ End Room</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

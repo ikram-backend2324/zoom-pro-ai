@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}About — Zoom{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="hero-badge"><span></span> <span data-i18n="about.badge">Our mission</span></div>
+  <h1 data-i18n="about.title">About Zoom</h1>
+  <p data-i18n="about.subtitle">We believe great meetings shouldn't require an account, a download, or a tutorial.</p>
+</div>
+
+<div class="about-content">
+  <p class="about-lead" data-i18n-html="about.lead">
+    Zoom is a platform built on one simple idea: <strong style="color:var(--text)">connecting people should be frictionless</strong>. No sign-ups, no software installs, no complicated setup. Just create a room, share a code, and meet.
+  </p>
+
+  <div class="section-header reveal" style="text-align:left;margin-bottom:2rem">
+    <div class="section-tag" data-i18n="about.values_tag">Our Values</div>
+    <h2 data-i18n="about.values_title">What we stand for</h2>
+  </div>
+
+  <div class="values-grid">
+    <div class="value-card reveal">
+      <div class="icon">⚡</div>
+      <h3 data-i18n="about.v1_t">Speed First</h3>
+      <p data-i18n="about.v1_d">Rooms are live in seconds. We obsess over removing every unnecessary step.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="icon">🔓</div>
+      <h3 data-i18n="about.v2_t">Open by Default</h3>
+      <p data-i18n="about.v2_d">No account needed. Privacy is opt-in, not a barrier to entry.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="icon">🌍</div>
+      <h3 data-i18n="about.v3_t">Universal Access</h3>
+      <p data-i18n="about.v3_d">Works on any device, any browser, any network — for anyone on Earth.</p>
+    </div>
+    <div class="value-card reveal">
+      <div class="icon">🛡️</div>
+      <h3 data-i18n="about.v4_t">Your Privacy</h3>
+      <p data-i18n="about.v4_d">We collect only what's needed to run your room. Nothing more, ever.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:4rem;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:3rem;backdrop-filter:blur(16px)" class="reveal">
+    <div class="section-tag" data-i18n="about.story_tag">The Story</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin:0.75rem 0 1rem;letter-spacing:-0.02em" data-i18n-html="about.story_title">Built for humans,<br>not enterprises</h2>
+    <p style="color:var(--text-muted);line-height:1.8;margin-bottom:1.5rem" data-i18n="about.story_body">Most video platforms are built for IT departments. Zoom was built for a student scrambling to set up a study group, a freelancer who just needs a quick call, a family trying to connect across continents. We stripped out everything unnecessary and kept only what matters: a room, a code, and the people you want to meet.</p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <a href="{% url 'create_room' %}" class="btn btn-primary" data-i18n="hero.create">🚀 Create a Room</a>
+      <a href="{% url 'join_room' %}" class="btn btn-ghost" data-i18n="about.join_btn">Join a Room</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> <span data-i18n="hero.badge">Now Live — Zero Setup Required</span></div>
+
+  <h1 data-i18n-html="hero.title">Connect. Share.<br><span class="word-zoom">Zoom</span> Together.</h1>
+  <p data-i18n="hero.subtitle">Create a room in seconds, share the code, and bring everyone into the same space. No downloads, no accounts — just instant, effortless meetings.</p>
+
+  <div class="hero-actions">
+    <a href="{% url 'create_room' %}" class="btn btn-primary btn-lg" data-i18n="hero.create">🚀 Create a Room</a>
+    <a href="{% url 'join_room' %}" class="btn btn-ghost btn-lg" data-i18n="hero.join">Join with Code →</a>
+  </div>
+
+  <div class="hero-cards">
+    <div class="hero-card">
+      <div class="card-icon bg-blue">⚡</div>
+      <div class="card-title" data-i18n="hero.card1_t">Instant Rooms</div>
+      <div class="card-desc" data-i18n="hero.card1_d">Your room is live in under 5 seconds</div>
+    </div>
+    <div class="hero-card">
+      <div class="card-icon bg-cyan">🔒</div>
+      <div class="card-title" data-i18n="hero.card2_t">Optional Password</div>
+      <div class="card-desc" data-i18n="hero.card2_d">Lock your room with a private password</div>
+    </div>
+    <div class="hero-card">
+      <div class="card-icon bg-gold">👥</div>
+      <div class="card-title" data-i18n="hero.card3_t">Unlimited Guests</div>
+      <div class="card-desc" data-i18n="hero.card3_d">Invite as many participants as you need</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid reveal">
+    <div class="stat-card">
+      <div class="stat-number" data-target="{{ total_rooms }}">{{ total_rooms }}</div>
+      <div class="stat-label" data-i18n="stats.rooms">Rooms Created</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" data-target="{{ total_participants }}">{{ total_participants }}</div>
+      <div class="stat-label" data-i18n="stats.participants">Participants Connected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" data-target="0">0</div>
+      <div class="stat-label" data-i18n="stats.accounts">Accounts Needed</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag" data-i18n="how.tag">How It Works</div>
+      <h2 data-i18n-html="how.title">Three steps to<br>being together</h2>
+      <p data-i18n="how.subtitle">No friction, no setup. The simplest way to get everyone in the same room.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">01</div>
+        <div class="step-icon bg-blue">🏗️</div>
+        <h3 data-i18n="how.s1_t">Create a Room</h3>
+        <p data-i18n="how.s1_d">Give your room a name, add an optional password for privacy, and you're live instantly.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-number">02</div>
+        <div class="step-icon bg-gold">📤</div>
+        <h3 data-i18n="how.s2_t">Share the Code</h3>
+        <p data-i18n="how.s2_d">Copy the unique 9-character room code and send it to whoever you want to invite.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-number">03</div>
+        <div class="step-icon bg-cyan">🎉</div>
+        <h3 data-i18n="how.s3_t">Everyone Joins</h3>
+        <p data-i18n="how.s3_d">Participants enter the code, type their name, and they're in — no account required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="arch-section">
+  <div class="arch-inner">
+    <div class="section-header reveal"><div class="section-tag" data-i18n="arch.tag">Under the Hood</div><h2 data-i18n="arch.title">Peer-to-peer by design</h2><p data-i18n="arch.subtitle">Your video and audio travel directly between participants. Our server only helps the connection get started — the call itself never passes through us.</p></div>
+    <div class="arch-stage reveal"><div class="arch-scene" id="archScene">
+      <div class="arch-floor"></div>
+      <div class="arch-beam" id="beamYouServer" style="background:linear-gradient(90deg,rgba(240,180,41,0.1),rgba(240,180,41,0.6));color:#f0b429"><span class="pulse"></span></div>
+      <div class="arch-beam" id="beamPeerServer" style="background:linear-gradient(90deg,rgba(240,180,41,0.6),rgba(240,180,41,0.1));color:#f0b429"><span class="pulse"></span></div>
+      <div class="arch-beam" id="beamYouPeer" style="background:linear-gradient(90deg,rgba(0,212,255,0.2),rgba(0,212,255,0.7),rgba(0,212,255,0.2));color:#00d4ff;height:3px"><span class="pulse"></span><span class="pulse" style="animation-delay:1.2s"></span></div>
+      <div class="arch-node node-server"><div class="node-card"><div class="node-icon">🛰️</div><div class="node-title" data-i18n="arch.signaling">Signaling Server</div><div class="node-sub" data-i18n="arch.signaling_d">Django Channels relays connection setup over WebSockets</div></div></div>
+      <div class="arch-node node-you"><div class="node-card"><div class="node-icon">🧑‍💻</div><div class="node-title" data-i18n="arch.you">You</div></div></div>
+      <div class="arch-node node-peer"><div class="node-card"><div class="node-icon">👤</div><div class="node-title" data-i18n="arch.peer">Peer</div></div></div>
+    </div></div>
+    <div class="arch-legend reveal"><div class="arch-legend-item"><span class="swatch" style="background:#f0b429"></span><span><strong style="color:var(--text)" data-i18n="arch.signaling">Signaling Server</strong></span></div><div class="arch-legend-item"><span class="swatch" style="background:#00d4ff"></span><span><strong style="color:var(--text)" data-i18n="arch.p2p">Direct P2P Media</strong></span></div></div>
+    <div class="section-header reveal" style="margin-top:5rem;margin-bottom:0"><div class="section-tag" data-i18n="arch.flow_title">Connection Flow</div></div>
+    <div class="flow-track reveal">
+      <div class="flow-node"><div class="flow-num">01</div><div class="flow-emoji">🚪</div><div class="flow-label" data-i18n="arch.step1">Open room</div></div><div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="flow-num">02</div><div class="flow-emoji">📡</div><div class="flow-label" data-i18n="arch.step2">Exchange signals</div></div><div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="flow-num">03</div><div class="flow-emoji">🔗</div><div class="flow-label" data-i18n="arch.step3">Direct connection</div></div><div class="flow-arrow">→</div>
+      <div class="flow-node"><div class="flow-num">04</div><div class="flow-emoji">🎥</div><div class="flow-label" data-i18n="arch.step4">Live call</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="padding-top:0">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag" data-i18n="feat.tag">Features</div>
+      <h2 data-i18n-html="feat.title">Built for real<br>human connection</h2>
+    </div>
+    <div class="features-grid">
+      {% for item in features_list %}
+      <div class="feature-card reveal">
+        <div class="feature-icon {{ item.bg }}">{{ item.icon }}</div>
+        <div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-blue">🔑</div>
+        <div><h3 data-i18n="feat.codes_t">Room Codes</h3><p data-i18n="feat.codes_d">Every room gets a unique 9-character code for easy sharing across any platform.</p></div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-gold">🛡️</div>
+        <div><h3 data-i18n="feat.pw_t">Password Protection</h3><p data-i18n="feat.pw_d">Add an optional password to keep uninvited guests out of your private sessions.</p></div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-cyan">👤</div>
+        <div><h3 data-i18n="feat.noacc_t">No Account Needed</h3><p data-i18n="feat.noacc_d">Just enter your name and join. Zero sign-up friction for you or your participants.</p></div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-green">📋</div>
+        <div><h3 data-i18n="feat.list_t">Participant List</h3><p data-i18n="feat.list_d">See everyone who's joined your room in real time with a clean, organized list.</p></div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-purple">🌐</div>
+        <div><h3 data-i18n="feat.share_t">Share Anywhere</h3><p data-i18n="feat.share_d">Copy the room link and share it via email, chat, or SMS — works everywhere.</p></div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon bg-blue">⚡</div>
+        <div><h3 data-i18n="feat.instant_t">Instant Start</h3><p data-i18n="feat.instant_d">Rooms are created and live in under 5 seconds. No waiting, no configuration.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT ROOMS -->
+{% if recent_rooms %}
+<section class="section" style="padding-top:0">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag" data-i18n="recent.tag">Active Now</div>
+      <h2 data-i18n="recent.title">Recent Rooms</h2>
+      <p data-i18n="recent.subtitle">Jump into one of the recently created rooms below.</p>
+    </div>
+    <div class="rooms-grid">
+      {% for room in recent_rooms %}
+      <a href="{% url 'room_detail' room.code %}" class="room-card reveal">
+        <div class="room-card-header">
+          <div class="room-card-name">{{ room.name }}</div>
+          {% if room.has_password %}
+          <div class="room-card-badge locked" data-i18n="room.private">🔒 Private</div>
+          {% else %}
+          <div class="room-card-badge" data-i18n="recent.open">● Open</div>
+          {% endif %}
+        </div>
+        <div class="room-card-host"><span data-i18n="recent.hosted">Hosted by</span> {{ room.host_name }}</div>
+        {% if room.description %}
+        <div style="font-size:0.82rem;color:var(--text-muted)">{{ room.description|truncatechars:80 }}</div>
+        {% endif %}
+        <div class="room-card-meta">
+          <span>👥 {{ room.participant_count }} <span data-i18n="recent.participants">participants</span></span>
+          <span class="room-card-code">{{ room.code }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="section" style="padding-top:0;padding-bottom:8rem">
+  <div class="section-inner">
+    <div style="background:linear-gradient(135deg,rgba(26,108,245,0.12),rgba(0,212,255,0.06));border:1px solid rgba(26,108,245,0.2);border-radius:24px;padding:4rem 2rem;text-align:center;position:relative;overflow:hidden;" class="reveal">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),var(--cyan),transparent)"></div>
+      <div class="section-tag" data-i18n="cta.tag">Ready?</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin:1rem 0" data-i18n-html="cta.title">Start your room<br>right now</h2>
+      <p style="color:var(--text-muted);margin-bottom:2rem" data-i18n="cta.subtitle">No setup. No account. Just click and connect.</p>
+      <a href="{% url 'create_room' %}" class="btn btn-gold btn-lg" data-i18n="cta.btn">🚀 Create My Room</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function layoutArchBeams(){const sc=document.getElementById('archScene');if(!sc)return;const c=q=>{const el=sc.querySelector(q+' .node-card');if(!el)return null;const n=el.closest('.arch-node');return{x:n.offsetLeft+n.offsetWidth/2,y:n.offsetTop+n.offsetHeight/2};};const y=c('.node-you'),p=c('.node-peer'),sv=c('.node-server');if(!y||!p||!sv)return;const d=(id,a,b)=>{const m=document.getElementById(id);if(!m)return;const dx=b.x-a.x,dy=b.y-a.y;m.style.left=a.x+'px';m.style.top=a.y+'px';m.style.width=Math.hypot(dx,dy)+'px';m.style.transform='rotate('+(Math.atan2(dy,dx)*180/Math.PI)+'deg)';};d('beamYouServer',y,sv);d('beamPeerServer',p,sv);d('beamYouPeer',y,p);}
+window.addEventListener('load',layoutArchBeams);window.addEventListener('resize',layoutArchBeams);setTimeout(layoutArchBeams,400);
+</script>
+{% endblock %}

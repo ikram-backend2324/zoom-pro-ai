@@ -1,0 +1,711 @@
+{% extends 'base.html' %}
+{% block title %}{{ room.name }} — Zoom{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── VIDEO SECTION ── */
+.video-section {
+  margin-bottom: 1.5rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  position: relative;
+}
+
+.video-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--cyan), var(--gold));
+  z-index: 2;
+}
+
+/* ── PRE-JOIN SCREEN ── */
+.prejoin-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  gap: 1.5rem;
+  min-height: 380px;
+}
+
+.prejoin-icon {
+  width: 80px; height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(26,108,245,0.2), rgba(0,212,255,0.1));
+  border: 1px solid rgba(26,108,245,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  animation: float 5s ease-in-out infinite;
+}
+
+.prejoin-screen h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.prejoin-screen p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.prejoin-name-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.prejoin-name-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  width: 220px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.prejoin-name-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26,108,245,0.15);
+}
+
+.prejoin-name-input::placeholder { color: rgba(122,138,170,0.5); }
+
+.prejoin-perms {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.prejoin-perms span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── NATIVE VIDEO GRID ── */
+.call-wrapper {
+  display: none;
+  width: 100%;
+  position: relative;
+}
+
+.video-grid {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  grid-template-columns: 1fr;
+  background: var(--navy-mid);
+  min-height: 420px;
+}
+
+@media (min-width: 640px) {
+  .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .video-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 980px) {
+  .video-grid.cols-4,
+  .video-grid.cols-5,
+  .video-grid.cols-6 { grid-template-columns: repeat(3, 1fr); }
+}
+
+.video-tile {
+  position: relative;
+  background: #06101f;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+}
+
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #06101f;
+  transform: scaleX(-1); /* mirror local + remote like every video app */
+}
+
+.video-tile.is-remote video { transform: none; }
+
+.tile-label {
+  position: absolute;
+  left: 10px; bottom: 10px;
+  background: rgba(5,13,26,0.72);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile-label .mic-off { color: #f87171; }
+
+.tile-avatar {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(26,108,245,0.25), rgba(0,212,255,0.12));
+}
+
+.video-tile.cam-off video { opacity: 0; }
+.video-tile.cam-off .tile-avatar { display: flex; }
+
+.video-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--navy-mid);
+  z-index: 1;
+  transition: opacity 0.5s;
+}
+
+.video-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 44px; height: 44px;
+  border: 3px solid rgba(26,108,245,0.2);
+  border-top-color: var(--blue-bright);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.video-loading p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ── VIDEO TOOLBAR ── */
+.video-toolbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(5,13,26,0.6);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.video-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #4ade80;
+}
+
+.toolbar-status .dot {
+  width: 7px; height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.toolbar-room-name {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--glass-border);
+}
+
+.leave-btn {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leave-btn:hover { background: rgba(239,68,68,0.25); }
+
+.ctrl-group { display: flex; gap: 0.5rem; align-items: center; }
+
+.ctrl-btn {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+}
+.ctrl-btn:hover { background: rgba(255,255,255,0.12); }
+.ctrl-btn.off {
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.35);
+  color: #f87171;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="room-page">
+
+  <!-- ── ROOM HEADER ── -->
+  <div class="room-header">
+    <div class="room-status-bar">
+      <div class="status-live"><div class="dot"></div> Live</div>
+      {% if room.has_password %}
+      <span style="font-size:0.8rem;background:rgba(240,180,41,0.12);border:1px solid rgba(240,180,41,0.25);color:var(--gold);padding:4px 12px;border-radius:100px" data-i18n="room.private">🔒 Private</span>
+      {% else %}
+      <span style="font-size:0.8rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80;padding:4px 12px;border-radius:100px" data-i18n="room.open">🌐 Open</span>
+      {% endif %}
+    </div>
+
+    <div class="room-name">{{ room.name }}</div>
+    <div class="room-host"><span data-i18n="room.hosted">Hosted by</span> <strong>{{ room.host_name }}</strong> · <span data-i18n="room.created">Created</span> {{ room.created_at|timesince }}</div>
+
+    {% if room.description %}
+    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem">{{ room.description }}</p>
+    {% endif %}
+
+    <div class="room-code-box">
+      <div>
+        <div class="room-code-label" data-i18n="room.code">Room Code</div>
+        <div class="room-code-value">{{ room.code }}</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode('{{ room.code }}')" data-i18n="room.copy_code">📋 Copy Code</button>
+    </div>
+
+    <div class="room-actions">
+      <button class="btn btn-ghost" onclick="copyLink()" data-i18n="room.copy_link">🔗 Copy Room Link</button>
+      <a href="{% url 'join_room' %}" class="btn btn-primary" data-i18n="room.invite">+ Invite Someone</a>
+      <form method="post" action="{% url 'end_room' room.code %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" onclick="return confirm('End this room for everyone?')">✕ End Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── VIDEO SECTION ── -->
+  <div class="video-section">
+
+    <!-- PRE-JOIN SCREEN -->
+    <div class="prejoin-screen" id="prejoinScreen">
+      <div class="prejoin-icon">🎥</div>
+      <h2 data-i18n="room.ready">Ready to join the call?</h2>
+      <p data-i18n="room.ready_d">Enter your display name and click Start Video to join the live video room. Your camera and microphone will be requested.</p>
+
+      <div class="prejoin-name-row">
+        <input
+          type="text"
+          class="prejoin-name-input"
+          id="displayName"
+          placeholder="Your display name" data-i18n-placeholder="room.name_ph"
+          value="{{ request.GET.name|default:'' }}"
+          maxlength="60"
+        >
+        <button class="btn btn-primary btn-lg" onclick="startVideo()">
+          <span data-i18n="room.start">🎥 Start Video</span>
+        </button>
+      </div>
+
+      <div class="prejoin-perms">
+        <span data-i18n="room.cam_need">📷 Camera access needed</span>
+        <span data-i18n="room.mic_need">🎙 Microphone access needed</span>
+        <span data-i18n="room.enc">🔒 Encrypted connection</span>
+      </div>
+    </div>
+
+    <!-- NATIVE VIDEO GRID (hidden until joined) -->
+    <div class="call-wrapper" id="callWrapper">
+      <div class="video-loading" id="videoLoading">
+        <div class="loading-spinner"></div>
+        <p data-i18n="room.connecting">Requesting camera &amp; microphone…</p>
+      </div>
+      <div class="video-grid cols-1" id="videoGrid"></div>
+    </div>
+
+    <!-- TOOLBAR (shown when in call) -->
+    <div class="video-toolbar" id="videoToolbar">
+      <div class="video-toolbar-left">
+        <div class="toolbar-status"><div class="dot"></div> <span data-i18n="room.connected">Connected</span></div>
+        <div class="toolbar-room-name">{{ room.name }}</div>
+      </div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" id="micBtn" onclick="toggleMic()" title="Mute / unmute">🎙</button>
+        <button class="ctrl-btn" id="camBtn" onclick="toggleCam()" title="Camera on / off">📷</button>
+        <button class="leave-btn" onclick="leaveVideo()" data-i18n="room.leave">📴 Leave Call</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── PARTICIPANTS + INFO GRID ── -->
+  <div class="room-grid">
+
+    <div class="room-panel">
+      <div class="panel-title">👥 <span data-i18n="room.participants">Participants</span> · {{ participants.count }}</div>
+      <div class="participants-list">
+        {% for p in participants %}
+        <div class="participant-item">
+          <div class="participant-avatar">{{ p.name|first|upper }}</div>
+          <div>
+            <div class="participant-name">{{ p.name }}</div>
+            <div class="participant-time"><span data-i18n="room.joined">Joined</span> {{ p.joined_at|timesince }}</div>
+          </div>
+          {% if p.name == room.host_name %}
+          <span class="host-badge" data-i18n="room.host_badge">Host</span>
+          {% endif %}
+        </div>
+        {% empty %}
+        <div class="empty-state">
+          <div class="empty-icon">👻</div>
+          <p data-i18n="room.no_part">No participants yet</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="room-panel">
+      <div class="panel-title">ℹ️ <span data-i18n="room.info">Room Info</span></div>
+      <div style="display:flex;flex-direction:column;gap:1rem">
+
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem" data-i18n="room.room_name">Room Name</div>
+          <div style="font-weight:600">{{ room.name }}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem" data-i18n="room.host">Host</div>
+          <div style="font-weight:600">{{ room.host_name }}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem" data-i18n="room.participants">Participants</div>
+          <div style="font-weight:600">{{ participants.count }} <span data-i18n="room.joined">joined</span></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem" data-i18n="room.privacy">Privacy</div>
+          <div style="font-weight:600">{% if room.has_password %}<span data-i18n="room.priv_pw">🔒 Password Protected</span>{% else %}<span data-i18n="room.priv_open">🌐 Open Room</span>{% endif %}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:1rem">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem" data-i18n="room.created">Created</div>
+          <div style="font-weight:600">{{ room.created_at|date:"M d, Y · H:i" }}</div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--glass-border)">
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em" data-i18n="room.share_invite">Share to Invite</div>
+        <div style="background:rgba(26,108,245,0.06);border:1px solid rgba(26,108,245,0.15);border-radius:8px;padding:0.75rem;font-family:monospace;font-size:0.78rem;color:var(--text-muted);word-break:break-all">
+          {{ request.build_absolute_uri }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const ROOM_CODE = "{{ room.code }}";
+const ROOM_NAME = "{{ room.name|escapejs }}";
+
+// Public STUN servers for NAT traversal. For calls across strict/symmetric
+// NATs you would also add a TURN server here.
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ],
+};
+
+let socket = null;
+let localStream = null;
+let myPeerId = null;
+let myName = '';
+let inCall = false;
+let micOn = true;
+let camOn = true;
+
+const peers = {};   // peerId -> { pc, name }
+const grid = () => document.getElementById('videoGrid');
+
+// ── JOIN FLOW ────────────────────────────────────────────────────────────
+
+async function startVideo() {
+  const nameInput = document.getElementById('displayName');
+  myName = nameInput.value.trim();
+
+  if (!myName) {
+    nameInput.focus();
+    nameInput.style.borderColor = 'var(--danger)';
+    nameInput.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.15)';
+    setTimeout(() => { nameInput.style.borderColor = ''; nameInput.style.boxShadow = ''; }, 2000);
+    return;
+  }
+
+  document.getElementById('prejoinScreen').style.display = 'none';
+  document.getElementById('callWrapper').style.display = 'block';
+  document.getElementById('videoToolbar').style.display = 'flex';
+
+  // 1. Get local media.
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  } catch (err) {
+    document.getElementById('videoLoading').innerHTML =
+      '<p style="color:#f87171;max-width:300px;text-align:center">Camera/microphone access was blocked. ' +
+      'Allow permissions in your browser and reload to join.</p>';
+    return;
+  }
+
+  const youLabel=(window.t?window.t('arch.you'):'You');
+  addTile('local', myName + ' (' + youLabel + ')', localStream, false);
+  document.getElementById('videoLoading').classList.add('hidden');
+  inCall = true;
+
+  // 2. Open the signaling socket.
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  socket = new WebSocket(`${proto}://${location.host}/ws/room/${ROOM_CODE}/`);
+  socket.onmessage = onSignal;
+  socket.onclose = () => { if (inCall) showToast('Connection lost — try rejoining.', 'info'); };
+}
+
+// ── SIGNALING ──────────────────────────────────────────────────────────────
+
+async function onSignal(evt) {
+  const data = JSON.parse(evt.data);
+
+  switch (data.type) {
+    case 'welcome':
+      myPeerId = data.peer_id;
+      // Announce ourselves now that we know our id and have media.
+      send({ type: 'ready', name: myName });
+      break;
+
+    case 'peer-join': {
+      // A peer announced itself. To avoid double offers (glare), the peer with
+      // the lexicographically larger id initiates the offer.
+      const otherId = data.peer_id;
+      if (!otherId || otherId === myPeerId) break;
+      if (!peers[otherId]) peers[otherId] = { pc: null, name: data.name };
+      else peers[otherId].name = data.name || peers[otherId].name;
+      relabel(otherId);
+
+      if (myPeerId > otherId) {
+        const pc = ensurePeer(otherId);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        send({ type: 'offer', target: otherId, sdp: offer, name: myName });
+      }
+      break;
+    }
+
+    case 'offer': {
+      const from = data.from_peer;
+      if (data.name) { peers[from] = peers[from] || {}; peers[from].name = data.name; }
+      const pc = ensurePeer(from);
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      send({ type: 'answer', target: from, sdp: answer, name: myName });
+      break;
+    }
+
+    case 'answer': {
+      const pc = peers[data.from_peer]?.pc;
+      if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      break;
+    }
+
+    case 'ice': {
+      const pc = peers[data.from_peer]?.pc;
+      if (pc && data.candidate) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (_) {}
+      }
+      break;
+    }
+
+    case 'peer-leave':
+      removePeer(data.peer_id);
+      break;
+  }
+}
+
+function send(obj) {
+  if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(obj));
+}
+
+// ── PEER CONNECTIONS ─────────────────────────────────────────────────────
+
+function ensurePeer(peerId) {
+  if (peers[peerId]?.pc) return peers[peerId].pc;
+
+  const pc = new RTCPeerConnection(ICE_CONFIG);
+  peers[peerId] = peers[peerId] || {};
+  peers[peerId].pc = pc;
+
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate) send({ type: 'ice', target: peerId, candidate: e.candidate });
+  };
+
+  pc.ontrack = (e) => {
+    addTile(peerId, peers[peerId]?.name || 'Guest', e.streams[0], true);
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+      // Don't tear down on a transient 'disconnected'; only on hard failure.
+      if (pc.connectionState === 'failed') removePeer(peerId);
+    }
+  };
+
+  return pc;
+}
+
+function removePeer(peerId) {
+  const p = peers[peerId];
+  if (!p) return;
+  if (p.pc) p.pc.close();
+  delete peers[peerId];
+  const tile = document.getElementById('tile-' + peerId);
+  if (tile) tile.remove();
+  layoutGrid();
+}
+
+// ── VIDEO TILES ──────────────────────────────────────────────────────────
+
+function addTile(id, label, stream, isRemote) {
+  let tile = document.getElementById('tile-' + id);
+  if (!tile) {
+    tile = document.createElement('div');
+    tile.className = 'video-tile' + (isRemote ? ' is-remote' : '');
+    tile.id = 'tile-' + id;
+
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
+    if (!isRemote) video.muted = true; // never echo your own audio
+    tile.appendChild(video);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'tile-avatar';
+    avatar.textContent = (label[0] || '?').toUpperCase();
+    tile.appendChild(avatar);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'tile-label';
+    lbl.innerHTML = '<span class="lbl-text"></span>';
+    tile.appendChild(lbl);
+
+    grid().appendChild(tile);
+  }
+  tile.querySelector('video').srcObject = stream;
+  tile.querySelector('.lbl-text').textContent = label;
+  layoutGrid();
+}
+
+function relabel(peerId) {
+  const tile = document.getElementById('tile-' + peerId);
+  if (tile && peers[peerId]?.name) {
+    tile.querySelector('.lbl-text').textContent = peers[peerId].name;
+    tile.querySelector('.tile-avatar').textContent = peers[peerId].name[0].toUpperCase();
+  }
+}
+
+function layoutGrid() {
+  const n = grid().children.length;
+  grid().className = 'video-grid cols-' + Math.min(n, 6);
+}
+
+// ── CONTROLS ───────────────────────────────────────────────────────────────
+
+function toggleMic() {
+  if (!localStream) return;
+  micOn = !micOn;
+  localStream.getAudioTracks().forEach(t => t.enabled = micOn);
+  document.getElementById('micBtn').classList.toggle('off', !micOn);
+  document.getElementById('micBtn').textContent = micOn ? '🎙' : '🔇';
+}
+
+function toggleCam() {
+  if (!localStream) return;
+  camOn = !camOn;
+  localStream.getVideoTracks().forEach(t => t.enabled = camOn);
+  document.getElementById('camBtn').classList.toggle('off', !camOn);
+  document.getElementById('localTileCam')?.remove();
+  document.getElementById('tile-local')?.classList.toggle('cam-off', !camOn);
+}
+
+function leaveVideo() {
+  if (!confirm('Leave the video call?')) return;
+  inCall = false;
+
+  Object.keys(peers).forEach(removePeer);
+  if (socket) { socket.close(); socket = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+
+  grid().innerHTML = '';
+  document.getElementById('callWrapper').style.display = 'none';
+  document.getElementById('videoToolbar').style.display = 'none';
+  document.getElementById('videoLoading').classList.remove('hidden');
+  document.getElementById('prejoinScreen').style.display = 'flex';
+}
+
+window.addEventListener('beforeunload', (e) => {
+  if (inCall) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>
+
+{% endblock %}

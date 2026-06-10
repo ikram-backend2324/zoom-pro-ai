@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Join a Room — Zoom{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="hero-badge"><span></span> <span data-i18n="join.badge">Enter your code</span></div>
+  <h1 data-i18n="join.title">Join a Room</h1>
+  <p data-i18n="join.subtitle">Got a room code? Enter it below along with your name to join instantly.</p>
+</div>
+
+<div class="form-container">
+  <div class="form-card">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label data-i18n="join.code_label">Room Code</label>
+        {{ form.code }}
+        {% if form.code.errors %}<ul class="errorlist">{% for e in form.code.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="form-hint" data-i18n="join.code_hint">9-character code like ABC123XYZ</div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="join.name_label">Your Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group">
+        <label data-i18n="join.pw_label">Room Password</label>
+        {{ form.password }}
+        <div class="form-hint" data-i18n="join.pw_hint">Only required for password-protected rooms</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg form-submit" data-i18n="join.submit">🎉 Join Room</button>
+    </form>
+
+    <div style="text-align:center;margin-top:1.5rem">
+      <span style="font-size:0.85rem;color:var(--text-muted)" data-i18n="join.need_room">Need a room?</span> 
+      <a href="{% url 'create_room' %}" style="font-size:0.85rem;color:var(--blue-bright);text-decoration:none" data-i18n="join.create_link">Create one →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

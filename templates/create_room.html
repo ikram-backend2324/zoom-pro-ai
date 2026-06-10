@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Create a Room — Zoom{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="hero-badge"><span></span> <span data-i18n="create.badge">Launch in seconds</span></div>
+  <h1 data-i18n="create.title">Create Your Room</h1>
+  <p data-i18n="create.subtitle">Set up a meeting space and invite anyone with a simple room code.</p>
+</div>
+
+<div class="form-container">
+  <div class="form-card">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label data-i18n="create.name_label">Room Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="create.host_label">Your Name (Host)</label>
+        {{ form.host_name }}
+        {% if form.host_name.errors %}<ul class="errorlist">{% for e in form.host_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="form-hint" data-i18n="create.host_hint">This is how you'll appear to participants</div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="create.desc_label">Description (optional)</label>
+        {{ form.description }}
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group">
+        <label data-i18n="create.pw_label">Room Password (optional)</label>
+        {{ form.password }}
+        <div class="form-hint" data-i18n="create.pw_hint">Leave blank to create a public open room</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg form-submit" data-i18n="create.submit">🚀 Create Room</button>
+    </form>
+
+    <div style="text-align:center;margin-top:1.5rem">
+      <span style="font-size:0.85rem;color:var(--text-muted)" data-i18n="create.have_code">Already have a code?</span> 
+      <a href="{% url 'join_room' %}" style="font-size:0.85rem;color:var(--blue-bright);text-decoration:none" data-i18n="create.join_link">Join a room →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

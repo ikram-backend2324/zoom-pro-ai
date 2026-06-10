@@ -1,0 +1,21 @@
+# Render deployment blueprint.
+# CRITICAL: startCommand runs an ASGI server (uvicorn) pointed at the Channels
+# ASGI app, so WebSocket upgrades to /ws/room/<code>/ are handled. A plain
+# "gunicorn zoom_project.wsgi" CANNOT serve WebSockets and returns 404 — that
+# was the cause of the "WebSocket handshake: Unexpected response code: 404".
+services:
+  - type: web
+    name: zoom-pro-ai
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "uvicorn zoom_project.asgi:application --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*"
